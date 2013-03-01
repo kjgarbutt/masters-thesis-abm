@@ -11,8 +11,9 @@ initialUnaware = 0.97;
 %%% ABM Toggles %%%
 TRUE = 1;
 FALSE = 0;
-individualValues = FALSE;
-network = FALSE;
+individualValues = TRUE;
+network = TRUE;
+sigmaFactors = TRUE;
 
 
 %%% Parameters %%%
@@ -23,6 +24,18 @@ if individualValues == TRUE
     b = 0.0000316*betarnd(2,2,1,populationSize);bb = 0; % contact rate
     k = 0.11492*betarnd(2,2,1,populationSize); % how fast potential adopters move to adopt
     P = 7000*betarnd(2,2,1,populationSize); % personal price
+    % ABM 4 with sigma factors
+    if sigmaFactors == TRUE
+        sigma1 = zeros(1,populationSize); % green factor
+        unif = rand(1,populationSize);
+        for i = 1:populationSize
+            sigma1(i) = (-log(1-unif(i))/(0.4*exp(1/exp(0.4*unif(i)))))/9;
+        end
+        sigma2 = betarnd(2,2,1,populationSize); % social influence factor
+    else
+        sigma1 = zeros(1,populationSize);
+        sigma2 = zeros(1,populationSize);
+    end
 else
     % ABM 1 based on DE
     d = 0.00039; % price sensitivity
@@ -31,15 +44,17 @@ else
     bb = 0.0000158; % adopter contact rate
     k = 0.05746; % how fast potential adopters move to adopt
     P = 3500; % personal price
+    sigma1 = 0;
+    sigma2 = 0;
 end
 % ABM 3 with network
 if network == FALSE
-    networkAdj = 0;
+    networkAdj = 1;
 end
 
 
 %%% Run ABM %%%
-[I,X,U] = abm(individualValues,network,populationSize,totalTime,networkAdj,initialAdopter,initialAware,initialUnaware,d,c,b,bb,k,P);
+[I,X,U] = abm(individualValues,network,sigmaFactors,populationSize,totalTime,networkAdj,initialAdopter,initialAware,initialUnaware,d,c,b,bb,k,P,sigma1,sigma2);
 
 eq = [I(totalTime+1);X(totalTime+1);U(totalTime+1)];
 nonCumulI = zeros(1,length(I));
