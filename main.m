@@ -14,7 +14,7 @@ FALSE = 0;
 individualValues = TRUE;
 network = TRUE;
 sigmaFactors = TRUE;
-
+dataCollecting = FALSE;
 
 %%% Parameters %%%
 % ABM 2 with individual values
@@ -54,19 +54,65 @@ end
 
 
 %%% Run ABM %%%
-[I,X,U] = abm(individualValues,network,sigmaFactors,populationSize,totalTime,networkAdj,initialAdopter,initialAware,initialUnaware,d,c,b,bb,k,P,sigma1,sigma2);
-
-eq = [I(totalTime+1);X(totalTime+1);U(totalTime+1)];
-nonCumulI = zeros(1,length(I));
-nonCumulX = zeros(1,length(X));
-nonCumulU = zeros(1,length(U));
-for i = 2:length(I)
-    nonCumulI(i) = I(i) - I(i-1);
-    nonCumulX(i) = X(i) - X(i-1);
-    nonCumulU(i) = U(i) - U(i-1);
+if dataCollecting == FALSE
+    [I,X,U] = abm(individualValues,network,sigmaFactors,populationSize,totalTime,networkAdj,initialAdopter,initialAware,initialUnaware,d,c,b,bb,k,P,sigma1,sigma2);
+    
+    eq = [I(totalTime+1);X(totalTime+1);U(totalTime+1)];
+    nonCumulI = zeros(1,length(I));
+    nonCumulX = zeros(1,length(X));
+    nonCumulU = zeros(1,length(U));
+    for i = 2:length(I)
+        nonCumulI(i) = I(i) - I(i-1);
+        nonCumulX(i) = X(i) - X(i-1);
+        nonCumulU(i) = U(i) - U(i-1);
+    end
+    time = [1:1:totalTime+1]';
+else % Multiple runs (data collection)
+    numRuns = 100;
+    for q = 1:numRuns
+        [I,X,U] = abm(individualValues,network,sigmaFactors,populationSize,totalTime,networkAdj,initialAdopter,initialAware,initialUnaware,d,c,b,bb,k,P,sigma1,sigma2);
+        eq = [I(totalTime+1);X(totalTime+1);U(totalTime+1)];
+        nonCumulI = zeros(1,length(I));
+        nonCumulX = zeros(1,length(X));
+        nonCumulU = zeros(1,length(U));
+        for i = 2:length(I)
+            nonCumulI(i) = I(i) - I(i-1);
+            nonCumulX(i) = X(i) - X(i-1);
+            nonCumulU(i) = U(i) - U(i-1);
+        end        
+        dataX(q,:) = nonCumulX;
+        dataI(q,:) = nonCumulI;
+        dataU(q,:) = nonCumulU;
+        eqX(q) = eq(2);
+        eqI(q) = eq(1);
+        eqU(q) = eq(3);
+    end
+    % Output for tables in thesis
+    meanI = mean(eqI)
+    meanX = mean(eqX)
+    meanU = mean(eqU)
+    sdI = std(eqI)
+    sdX = std(eqX)
+    sdU = std(eqU)
+    ssrI = 0;
+    ssrX = 0;
+    ssrU = 0;
+    for q = 1:numRuns
+        ssrI = ssrI + (eqI(q) - 0.744628449200005)^2;
+        ssrX = ssrX + (eqX(q) - 0.255367262816116)^2;
+        ssrU = ssrU + (eqU(q) - 0.000004287970674)^2;
+    end
+    ssrI
+    ssrX
+    ssrU
+    % Printing data to .txt files
+    filename = sprintf('dataI-pa-%dAgents-%dRuns.txt',populationSize,numRuns);
+    dlmwrite(filename,dataI,'delimiter',' ','precision','%.15f')
+    filename = sprintf('dataX-pa-%dAgents-%dRuns.txt',populationSize,numRuns);
+    dlmwrite(filename,dataX,'delimiter',' ','precision','%.15f')
+    filename = sprintf('dataU-pa-%dAgents-%dRuns.txt',populationSize,numRuns);
+    dlmwrite(filename,dataU,'delimiter',' ','precision','%.15f')
 end
-time = [1:1:totalTime+1]';
-
 
 %%% Plot %%%
 hold on

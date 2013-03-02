@@ -101,13 +101,13 @@ for t = 1:totalTime
     for agent = 1:populationSize
         %%% Unaware %%%
         if attributes(1,agent) == unaware
-            unawareActions
+            unawareActions()
         %%% Aware %%%
         elseif attributes(1,agent) == aware
-            awareActions
+            awareActions()
         %%% Adopter %%%
         elseif attributes(1,agent) == adopter
-            adopterActions
+            adopterActions()
         end
     end
     attributes(1,:) = attributes(2,:); % transition to next turn
@@ -122,7 +122,7 @@ end
 
 %--------------------------------------------------------------------------
 
-function unawareActions
+function unawareActions()
 
 format long
 %%% Calculating number of aware/adopter neighbours and average contact rate of aware/adopter neighbours %%%
@@ -168,7 +168,7 @@ end
 
 %--------------------------------------------------------------------------
 
-function awareActions
+function awareActions()
 
 format long
 %%% Calculating number of adopter neighbours %%%
@@ -195,11 +195,11 @@ end
 
 %--------------------------------------------------------------------------
 
-function adopterActions
+function adopterActions()
 
 format long
 %%% Transition %%%
-if rand(1) > exp(-d*attributes(6,agent)) & attributes(9,agent) ~= innovator % likelihood of finding the price unacceptable
+if rand(1) > exp(-d*attributes(6,agent)) && attributes(9,agent) ~= innovator % likelihood of finding the price unacceptable
     if rand(1) < attributes(5,agent)     % and disadopting
         attributes(2,agent) = aware;
         numX = numX - 1;
