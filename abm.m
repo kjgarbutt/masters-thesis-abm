@@ -11,10 +11,6 @@ X = zeros(1,totalTime);X(1) = initialAdopter; % fraction of adopters at each tim
 I = zeros(1,totalTime);I(1) = initialAware; % fraction of aware at each time step
 U = zeros(1,totalTime);U(1) = initialUnaware; % fraction of unaware at each time step
 
-%avgNeighbourhoodSize = round(mean(sum(networkAdj,1)));
-maxNeighbourhoodSize = max(sum(networkAdj,1));
-Nz = maxNeighbourhoodSize;
-
 % States %
 unaware = 0;
 aware = 1;
@@ -90,7 +86,7 @@ for t = 1:totalTime
         if numAdopterNeighbours ~= 0
             avgbAdopterNeighbours = avgbAdopterNeighbours/numAdopterNeighbours;
         end
-    elseif individualValues == FALSE && network == FALSE % ABM 1
+    else % ABM 1
         avgbAwareNeighbours = b;
         avgbAdopterNeighbours = bb;
         numNeighbours = populationSize;
@@ -171,19 +167,19 @@ end
 function awareActions()
 
 format long
-%%% Calculating number of adopter neighbours %%%
-numAdopterNeighbours = 0;
+%%% Calculating influence of adopter neighbours %%%
+influence = 0;
 if sigmaFactors == TRUE % ABM 4
     for neighbour = 1:populationSize
         if networkAdj(agent,neighbour) == 1
             if attributes(1,neighbour) == adopter
-                numAdopterNeighbours = numAdopterNeighbours + 1;
+                influence = influence + attributes(4,neighbour);
             end
         end
     end
 end
 %%% Transition %%%
-if rand(1) < exp(-d*attributes(6,agent))*(1-attributes(8,agent))+(attributes(8,agent)*(numAdopterNeighbours/Nz)) % likelihood of becoming a potential adopter [from the DE model]
+if rand(1) < exp(-d*attributes(6,agent))*(1-attributes(8,agent))+(attributes(8,agent)*(influence)) % likelihood of becoming a potential adopter [from the DE model]
     if rand(1) < attributes(5,agent) % likelihood of adopting after being a potential adopter [from the DE model]
         attributes(2,agent) = adopter;
         numI = numI - 1;
@@ -198,8 +194,19 @@ end
 function adopterActions()
 
 format long
+%%% Calculating influence of adopter neighbours %%%
+influence = 0;
+if sigmaFactors == TRUE % ABM 4
+    for neighbour = 1:populationSize
+        if networkAdj(agent,neighbour) == 1
+            if attributes(1,neighbour) == adopter
+                influence = influence + attributes(4,neighbour);
+            end
+        end
+    end
+end
 %%% Transition %%%
-if rand(1) > exp(-d*attributes(6,agent)) && attributes(9,agent) ~= innovator % likelihood of finding the price unacceptable
+if rand(1) > exp(-d*attributes(6,agent))*(1-attributes(8,agent))+(attributes(8,agent)*(influence)) && attributes(9,agent) ~= innovator % likelihood of finding the price unacceptable
     if rand(1) < attributes(5,agent)     % and disadopting
         attributes(2,agent) = aware;
         numX = numX - 1;

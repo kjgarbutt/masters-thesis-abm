@@ -79,12 +79,12 @@ else % Multiple runs (data collection)
             nonCumulI(i) = I(i) - I(i-1);
             nonCumulX(i) = X(i) - X(i-1);
             nonCumulU(i) = U(i) - U(i-1);
-        end        
-        dataX(q,:) = nonCumulX;
+        end
         dataI(q,:) = nonCumulI;
+        dataX(q,:) = nonCumulX;
         dataU(q,:) = nonCumulU;
-        eqX(q) = eq(2);
         eqI(q) = eq(1);
+        eqX(q) = eq(2);
         eqU(q) = eq(3);
     end
     % Output for tables in thesis
@@ -98,9 +98,9 @@ else % Multiple runs (data collection)
     ssrX = 0;
     ssrU = 0;
     for q = 1:numRuns
-        ssrI = ssrI + (eqI(q) - 0.744628449200005)^2;
-        ssrX = ssrX + (eqX(q) - 0.255367262816116)^2;
-        ssrU = ssrU + (eqU(q) - 0.000004287970674)^2;
+        ssrI = ssrI + (eqI(q) - 0.744619324011922)^2;
+        ssrX = ssrX + (eqX(q) - 0.255380675988078)^2;
+        ssrU = ssrU + (eqU(q) - 0)^2;
     end
     ssrI
     ssrX
