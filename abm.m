@@ -179,11 +179,17 @@ if sigmaFactors == TRUE % ABM 4
     end
 end
 %%% Transition %%%
-if rand(1) < exp(-d*attributes(6,agent))*(1-attributes(8,agent))+(attributes(8,agent)*(influence)) % likelihood of becoming a potential adopter [from the DE model]
+if rand(1) < attributes(7,agent) && attributes(7,agent) > 0.5
+    attributes(2,agent) = adopter;
+    numI = numI - 1;
+    numX = numX + 1;
+    attributes(9,agent) = 2; % adopted through green measures
+elseif rand(1) < exp(-d*attributes(6,agent))*(1-attributes(8,agent))+(attributes(8,agent)*(influence)) % likelihood of becoming a potential adopter [from the DE model]
     if rand(1) < attributes(5,agent) % likelihood of adopting after being a potential adopter [from the DE model]
         attributes(2,agent) = adopter;
         numI = numI - 1;
         numX = numX + 1;
+        attributes(9,agent) = 0;
     end
 end
 
@@ -206,11 +212,23 @@ if sigmaFactors == TRUE % ABM 4
     end
 end
 %%% Transition %%%
-if rand(1) > exp(-d*attributes(6,agent))*(1-attributes(8,agent))+(attributes(8,agent)*(influence)) && attributes(9,agent) ~= innovator % likelihood of finding the price unacceptable
-    if rand(1) < attributes(5,agent)     % and disadopting
-        attributes(2,agent) = aware;
-        numX = numX - 1;
-        numI = numI + 1;
+if attributes(9,agent) == 2
+    if rand(1) > attributes(7,agent)
+        if rand(1) > exp(-d*attributes(6,agent))*(1-attributes(8,agent))+(attributes(8,agent)*(influence)) % likelihood of finding the price unacceptable
+            if rand(1) < attributes(5,agent)     % and disadopting
+                attributes(2,agent) = aware;
+                numX = numX - 1;
+                numI = numI + 1;
+            end
+        end
+    end
+else
+    if rand(1) > exp(-d*attributes(6,agent))*(1-attributes(8,agent))+(attributes(8,agent)*(influence)) && attributes(9,agent) ~= innovator % likelihood of finding the price unacceptable
+        if rand(1) < attributes(5,agent)     % and disadopting
+            attributes(2,agent) = aware;
+            numX = numX - 1;
+            numI = numI + 1;
+        end
     end
 end
 
